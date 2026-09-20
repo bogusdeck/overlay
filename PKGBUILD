@@ -1,0 +1,29 @@
+# Maintainer: bogusdeck <bogusdeck@github.com>
+pkgname=overlay
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="macOS & Linux AI Assistant & Code HUD with Ollama and Antigravity"
+arch=('x86_64' 'aarch64')
+url="https://github.com/bogusdeck/meowmeow"
+license=('MIT')
+depends=('glibc')
+makedepends=('go')
+optdepends=(
+    'tesseract: OCR screen capture support'
+    'maim: Screen capture utility'
+    'scrot: Alternative screen capture utility'
+    'xclip: Clipboard access on X11'
+    'wl-clipboard: Clipboard access on Wayland'
+)
+source=("$pkgname-$pkgver.tar.gz::$url/archive/v$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$srcdir"
+  GOOS=linux CGO_ENABLED=0 go build -o overlay .
+}
+
+package() {
+  install -Dm755 overlay "$pkgdir/usr/bin/overlay"
+  install -Dm644 overlay.service "$pkgdir/usr/lib/systemd/user/overlay.service"
+}

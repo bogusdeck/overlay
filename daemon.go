@@ -72,8 +72,9 @@ func startBackground() {
 func stopBackground() {
 	stopped := false
 
-	// If managed by Homebrew services / launchd, stop the service first to prevent auto-restart
+	// If managed by Homebrew / launchd / systemd services, stop the service first to prevent auto-restart
 	_ = exec.Command("brew", "services", "stop", "overlay").Run()
+	_ = exec.Command("systemctl", "--user", "stop", "overlay").Run()
 
 	if pid := getRunningPID(); pid != 0 {
 		if proc, err := os.FindProcess(pid); err == nil {

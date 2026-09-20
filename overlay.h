@@ -1,7 +1,13 @@
 #ifndef OVERLAY_H
 #define OVERLAY_H
 
+#ifdef __APPLE__
 #import <Cocoa/Cocoa.h>
+#else
+#include <stdbool.h>
+#include <stdint.h>
+typedef uint64_t CGEventFlags;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +26,7 @@ void ResizeHUDWindow(int dw, int dh);
 void SetHUDCursorStandard(void);
 void RunAppKitLoop(void);
 void PerformScreenCaptureOCR(void);
+void StartGlobalHotkeys(void);
 
 void goHotkeyTranslate(void);
 void goHotkeySnapOCR(void);

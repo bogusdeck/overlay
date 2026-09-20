@@ -1,0 +1,12 @@
+Package: overlay
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Maintainer: bogusdeck <bogusdeck@github.com>
+Depends: libc6 (>= 2.27)
+Recommends: maim, scrot, tesseract-ocr, xclip, wl-clipboard
+Description: macOS & Linux AI Assistant & Code HUD
+ Overlay is a lightweight, floating translucent HUD application for AI assistance,
+ screen OCR capture, clipboard problem solving, and dual AI backend routing powered
+ by Ollama and Antigravity (agy).

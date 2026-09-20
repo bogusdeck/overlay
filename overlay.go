@@ -1,19 +1,9 @@
 package main
 
-/*
-#cgo CFLAGS: -x objective-c -Wno-deprecated-declarations -mmacosx-version-min=13.0
-#cgo LDFLAGS: -framework Cocoa -framework QuartzCore -framework Vision -mmacosx-version-min=13.0
-
-#include "overlay.h"
-#include <stdlib.h>
-*/
-import "C"
 import (
 	"fmt"
-	"log"
 	"sync"
 	"time"
-	"unsafe"
 
 	"github.com/atotto/clipboard"
 )
@@ -30,28 +20,7 @@ var (
 	currentActivePrompt string
 )
 
-//export goOnSubmitPrompt
-func goOnSubmitPrompt(cText *C.char) {
-	text := C.GoString(cText)
-	if text == "" {
-		return
-	}
-	log.Printf("User submitted prompt from HUD: %s", text)
-	go processTranslationWithPrimary(text, true, "ollama")
-}
-
-//export goOnSubmitScreenCapture
-func goOnSubmitScreenCapture(cText *C.char) {
-	text := C.GoString(cText)
-	if text == "" {
-		return
-	}
-	log.Printf("User submitted screen capture OCR prompt: %s", text)
-	go processTranslationWithPrimary(text, true, "antigravity")
-}
-
-//export goOnNextCard
-func goOnNextCard() {
+func handleNextCard() {
 	historyLock.Lock()
 	defer historyLock.Unlock()
 
@@ -64,8 +33,7 @@ func goOnNextCard() {
 	}
 }
 
-//export goOnPrevCard
-func goOnPrevCard() {
+func handlePrevCard() {
 	historyLock.Lock()
 	defer historyLock.Unlock()
 
@@ -78,8 +46,7 @@ func goOnPrevCard() {
 	}
 }
 
-//export goOnInstantAgy
-func goOnInstantAgy() {
+func handleInstantAgy() {
 	historyLock.Lock()
 	prompt := currentActivePrompt
 	if prompt == "" && currentHistoryIndex >= 0 && currentHistoryIndex < len(historyCards) {
@@ -88,9 +55,7 @@ func goOnInstantAgy() {
 	historyLock.Unlock()
 
 	if prompt == "" {
-		cMsg := C.CString("ℹ️ No active or history request to accelerate with Antigravity.")
-		defer C.free(unsafe.Pointer(cMsg))
-		C.ShowHUDText(cMsg)
+		platformShowHUDText("ℹ️ No active or history request to accelerate with Antigravity.")
 		return
 	}
 
@@ -102,9 +67,7 @@ func goOnInstantAgy() {
 		updateTimer := func() {
 			secs := int(time.Since(start).Seconds())
 			loadingText := fmt.Sprintf("%s (%ds)...", modelName, secs)
-			cLoading := C.CString(loadingText)
-			C.ShowHUDText(cLoading)
-			C.free(unsafe.Pointer(cLoading))
+			platformShowHUDText(loadingText)
 		}
 		updateTimer()
 
@@ -138,13 +101,8 @@ func updateHUDDisplay() {
 		card := historyCards[currentHistoryIndex]
 		idxText := fmt.Sprintf("[%d/%d]", currentHistoryIndex+1, len(historyCards))
 
-		cRes := C.CString(card.Result)
-		cIdx := C.CString(idxText)
-		defer C.free(unsafe.Pointer(cRes))
-		defer C.free(unsafe.Pointer(cIdx))
-
-		C.ShowHUDText(cRes)
-		C.SetHUDIndexText(cIdx)
+		platformShowHUDText(card.Result)
+		platformSetHUDIndexText(idxText)
 	}
 }
 
@@ -165,9 +123,7 @@ func processTranslationWithPrimary(text string, isRawPrompt bool, primaryProvide
 		updateTimer := func() {
 			secs := int(time.Since(start).Seconds())
 			loadingText := fmt.Sprintf("%s (%ds)...", modelName, secs)
-			cLoading := C.CString(loadingText)
-			C.ShowHUDText(cLoading)
-			C.free(unsafe.Pointer(cLoading))
+			platformShowHUDText(loadingText)
 		}
 		updateTimer()
 
@@ -199,9 +155,7 @@ func processTranslationWithPrimary(text string, isRawPrompt bool, primaryProvide
 func onTranslateClipboard() {
 	text, err := clipboard.ReadAll()
 	if err != nil || text == "" {
-		cErr := C.CString("⚠️ Clipboard is empty or unreadable.")
-		defer C.free(unsafe.Pointer(cErr))
-		C.ShowHUDText(cErr)
+		platformShowHUDText("⚠️ Clipboard is empty or unreadable.")
 		return
 	}
 	go processTranslationWithPrimary(text, false, "ollama")

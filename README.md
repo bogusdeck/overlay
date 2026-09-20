@@ -2,9 +2,9 @@
   <img src="assets/pixel_eye.png" alt="Overlay Logo" width="220" />
 </div>
 
-# Overlay — macOS AI Assistant & Code HUD
+# Overlay — macOS & Linux AI Assistant & Code HUD
 
-Overlay is a lightweight, floating translucent HUD application for macOS written in Go + CGo (AppKit). It provides instant screen OCR capture, clipboard problem solving, rich Markdown syntax highlighting, and dual AI backend routing powered by Ollama and Antigravity (`agy`).
+Overlay is a lightweight, floating translucent HUD application for macOS and Linux written in Go. It provides instant screen OCR capture, clipboard problem solving, rich Markdown syntax highlighting, and dual AI backend routing powered by Ollama and Antigravity (`agy`).
 
 > [!NOTE]
 > 🤫 **Where's the demo GIF preview?**  
@@ -14,9 +14,9 @@ Overlay is a lightweight, floating translucent HUD application for macOS written
 
 ## Key Features
 
-- **Automatic Full-Screen Capture & Vision OCR**:
+- **Automatic Full-Screen Capture & Vision / Tesseract OCR**:
   - Press `Cmd` + `Ctrl` + `Fn` + `S` (or click `📸`) to silently capture the full main screen.
-  - Text is extracted instantly using Apple's native Vision framework (`VNRecognizeTextRequest`).
+  - Text is extracted instantly using Apple's Vision framework (`VNRecognizeTextRequest` on macOS) or `tesseract` (on Linux).
 - **Screen-Share Invisibility**:
   - Window sharing type set to `NSWindowSharingNone` with no window shadow (`hasShadow: NO`) to remain invisible on screen shares and recordings.
 - **Rich Markdown Syntax Highlighting**:
@@ -35,19 +35,46 @@ Overlay is a lightweight, floating translucent HUD application for macOS written
 
 ## Installation
 
-### Homebrew (Recommended)
+### Homebrew (macOS)
 
 ```bash
 brew tap bogusdeck/meowmeow https://github.com/bogusdeck/meowmeow.git
 brew install overlay
-```
-
-#### Run as Background Service
-```bash
 brew services start overlay
 ```
 
-#### CLI Daemon Commands
+### Debian / Ubuntu (`apt-get`)
+
+Download the `.deb` package or build it locally using `make deb`:
+
+```bash
+# Build .deb package locally
+make deb
+
+# Install via apt-get or apt
+sudo apt-get update
+sudo apt-get install ./dist/overlay_1.0.0_amd64.deb
+```
+
+#### Run as Systemd User Service (Linux)
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now overlay
+```
+
+### Arch Linux (`pacman`)
+
+Build and install using `pacman` or `makepkg`:
+
+```bash
+# Build via PKGBUILD
+makepkg -si
+
+# Or install compiled package via pacman
+sudo pacman -U dist/overlay-1.0.0-1-x86_64.pkg.tar.zst
+```
+
+### CLI Daemon Commands (macOS & Linux)
 ```bash
 overlay --start
 overlay --stop
@@ -57,15 +84,16 @@ overlay --status
 ### Manual Build
 
 #### Prerequisites
-- macOS 12+ (Apple Silicon or Intel)
+- macOS 12+ or Linux (Debian, Ubuntu, Arch, Fedora, etc.)
 - Go 1.20+
 - Ollama and/or Antigravity CLI (`agy`)
+- *(Optional for Linux OCR)*: `tesseract`, `maim` or `scrot`
 
 #### Build Steps
 ```bash
 git clone https://github.com/bogusdeck/meowmeow.git
 cd meowmeow
-go build -o overlay .
+make build
 ./overlay --start
 ```
 

@@ -1,13 +1,5 @@
 package main
 
-/*
-#cgo CFLAGS: -x objective-c -Wno-deprecated-declarations -mmacosx-version-min=13.0
-#cgo LDFLAGS: -framework Cocoa -mmacosx-version-min=13.0
-
-#include "overlay.h"
-#include <stdlib.h>
-*/
-import "C"
 import (
 	"encoding/json"
 	"fmt"
@@ -15,7 +7,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"unsafe"
 )
 
 type Config struct {
@@ -94,12 +85,9 @@ func saveConfig(cfg Config) error {
 
 func applyFullConfig(cfg Config) {
 	cmd, ctrl, fn, alt, shift := parseLeaderKey(cfg.Leader)
-	C.SetLeaderModifiers(C.bool(cmd), C.bool(ctrl), C.bool(fn), C.bool(alt), C.bool(shift))
-	C.SetHUDOpacity(C.float(cfg.Opacity))
-
-	cFont := C.CString(cfg.FontFamily)
-	defer C.free(unsafe.Pointer(cFont))
-	C.SetHUDFontConfig(cFont, C.float(cfg.FontSize))
+	platformSetLeaderModifiers(cmd, ctrl, fn, alt, shift)
+	platformSetHUDOpacity(cfg.Opacity)
+	platformSetHUDFontConfig(cfg.FontFamily, cfg.FontSize)
 
 	if cfg.OllamaModel != "" {
 		ollamaModel = cfg.OllamaModel
