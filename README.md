@@ -6,6 +6,10 @@
 
 Overlay is a lightweight, floating translucent HUD application for macOS written in Go + CGo (AppKit). It provides instant screen OCR capture, clipboard problem solving, rich Markdown syntax highlighting, and dual AI backend routing powered by Ollama and Antigravity (`agy`).
 
+> [!NOTE]
+> 🤫 **Where's the demo GIF preview?**  
+> *Oops! We tried to record a demo video, but Overlay is so stealthy (`NSWindowSharingNone`) that screen recorders literally capture right through it! You'll just have to run it locally to see the magic.* 🪄
+
 ---
 
 ## Key Features
