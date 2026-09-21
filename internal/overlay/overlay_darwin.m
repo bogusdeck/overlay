@@ -229,7 +229,7 @@ static HUDWindow* createHUDWindow() {
 
     NSRect frame = NSMakeRect(x, y, width, height);
     HUDWindow *window = [[HUDWindow alloc] initWithContentRect:frame
-                                                     styleMask:NSWindowStyleMaskNonactivatingPanel | NSWindowStyleMaskResizable
+                                                     styleMask:NSWindowStyleMaskNonactivatingPanel
                                                        backing:NSBackingStoreBuffered
                                                          defer:NO];
 
