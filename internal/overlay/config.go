@@ -14,6 +14,7 @@ type Config struct {
 	Opacity     float64 `json:"opacity"`      // Translucency percentage 0-100 (default 88.0)
 	FontFamily  string  `json:"font_family"`  // e.g. "Menlo", "SF Mono", "Monaco", "Courier", "system"
 	FontSize    float64 `json:"font_size"`    // e.g. 11.5
+	Provider    string  `json:"provider"`     // "antigravity" or "ollama" (default "antigravity")
 	OllamaModel string  `json:"ollama_model"` // e.g. "qwen2.5-coder" or ""
 	AgyModel    string  `json:"agy_model"`    // e.g. "gemini-3.1-pro-high"
 	AgyEffort   string  `json:"agy_effort"`   // e.g. "high", "medium", "low"
@@ -26,6 +27,7 @@ func defaultConfig() Config {
 		Opacity:     88.0,
 		FontFamily:  "Menlo",
 		FontSize:    11.5,
+		Provider:    "antigravity",
 		OllamaModel: "",
 		AgyModel:    "gemini-3.1-pro-high",
 		AgyEffort:   "high",
@@ -63,6 +65,9 @@ func loadConfig() Config {
 	if cfg.FontSize <= 0 {
 		cfg.FontSize = 11.5
 	}
+	if strings.TrimSpace(cfg.Provider) == "" {
+		cfg.Provider = "antigravity"
+	}
 	if strings.TrimSpace(cfg.AgyModel) == "" {
 		cfg.AgyModel = "gemini-3.1-pro-high"
 	}
@@ -89,6 +94,9 @@ func applyFullConfig(cfg Config) {
 	platformSetHUDOpacity(cfg.Opacity)
 	platformSetHUDFontConfig(cfg.FontFamily, cfg.FontSize)
 
+	if cfg.Provider != "" {
+		preferredProvider = strings.ToLower(cfg.Provider)
+	}
 	if cfg.OllamaModel != "" {
 		ollamaModel = cfg.OllamaModel
 	}
@@ -131,6 +139,7 @@ func HandleConfigCommand(args []string) {
 		fmt.Printf("  Translucency/Opacity: %.0f%%\n", cfg.Opacity)
 		fmt.Printf("  Font Family:       %s\n", cfg.FontFamily)
 		fmt.Printf("  Font Size:         %.1f pt\n", cfg.FontSize)
+		fmt.Printf("  Primary Provider:  %s (antigravity / ollama)\n", cfg.Provider)
 		fmt.Printf("  Ollama Model:      %s (auto-detect if empty)\n", cfg.OllamaModel)
 		fmt.Printf("  Antigravity Model: %s\n", cfg.AgyModel)
 		fmt.Printf("  Antigravity Effort:%s\n", cfg.AgyEffort)
@@ -143,6 +152,20 @@ func HandleConfigCommand(args []string) {
 	cfg := loadConfig()
 
 	switch sub {
+	case "provider":
+		if len(args) < 2 {
+			fmt.Println("Usage: overlay --config provider [antigravity | ollama]")
+			os.Exit(1)
+		}
+		val := strings.ToLower(strings.TrimSpace(args[1]))
+		if val != "antigravity" && val != "ollama" {
+			fmt.Println("Error: Provider must be 'antigravity' or 'ollama'.")
+			os.Exit(1)
+		}
+		cfg.Provider = val
+		_ = saveConfig(cfg)
+		fmt.Printf("✅ Primary provider updated to: %s\n", cfg.Provider)
+
 	case "leader":
 		if len(args) < 2 {
 			fmt.Println("Usage: overlay --config leader \"ctrl+cmd+fn\"")

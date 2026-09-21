@@ -15,7 +15,7 @@ func goOnSubmitPrompt(cText *C.char) {
 		return
 	}
 	log.Printf("User submitted prompt from HUD: %s", text)
-	go processTranslationWithPrimary(text, true, "ollama")
+	go processTranslationWithPrimary(text, true, preferredProvider)
 }
 
 //export goOnSubmitScreenCapture

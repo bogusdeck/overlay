@@ -120,7 +120,7 @@ func updateHUDDisplay() {
 }
 
 func processTranslation(text string, isRawPrompt bool) {
-	processTranslationWithPrimary(text, isRawPrompt, "ollama")
+	processTranslationWithPrimary(text, isRawPrompt, preferredProvider)
 }
 
 func processTranslationWithPrimary(text string, isRawPrompt bool, primaryProvider string) {
@@ -171,5 +171,5 @@ func onTranslateClipboard() {
 		platformShowHUDText("⚠️ Clipboard is empty or unreadable.")
 		return
 	}
-	go processTranslationWithPrimary(text, false, "ollama")
+	go processTranslationWithPrimary(text, false, preferredProvider)
 }
