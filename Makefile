@@ -1,7 +1,7 @@
 .PHONY: all build build-linux deb pacman arch clean install help
 
 BINARY_NAME=overlay
-VERSION=1.0.0
+VERSION=1.2.0
 
 all: build
 

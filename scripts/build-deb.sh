@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="1.0.0"
+VERSION="1.2.0"
 ARCH="${1:-amd64}"
 BUILD_DIR="dist/deb/overlay_${VERSION}_${ARCH}"
 

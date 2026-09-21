@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-VERSION="1.0.0"
+VERSION="1.2.0"
 ARCH="${1:-x86_64}"
 BUILD_DIR="dist/pacman/overlay-${VERSION}-${ARCH}"
 
