@@ -53,7 +53,7 @@ make deb
 
 # Install via apt-get or apt
 sudo apt-get update
-sudo apt-get install ./dist/overlay_1.0.0_amd64.deb
+sudo apt-get install ./dist/overlay_1.2.0_amd64.deb
 ```
 
 #### Run as Systemd User Service (Linux)
@@ -71,7 +71,7 @@ Build and install using `pacman` or `makepkg`:
 makepkg -si
 
 # Or install compiled package via pacman
-sudo pacman -U dist/overlay-1.0.0-1-x86_64.pkg.tar.zst
+sudo pacman -U dist/overlay-1.2.0-1-x86_64.pkg.tar.zst
 ```
 
 ### CLI Daemon Commands (macOS & Linux)
