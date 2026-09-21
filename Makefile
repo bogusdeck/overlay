@@ -7,11 +7,11 @@ all: build
 
 build:
 	@echo "🔨 Building overlay..."
-	go build -o $(BINARY_NAME) .
+	go build -o $(BINARY_NAME) ./cmd/overlay
 
 build-linux:
 	@echo "🔨 Building overlay for Linux..."
-	GOOS=linux CGO_ENABLED=0 go build -o $(BINARY_NAME)_linux .
+	GOOS=linux CGO_ENABLED=0 go build -o $(BINARY_NAME)_linux ./cmd/overlay
 
 deb:
 	@bash ./scripts/build-deb.sh amd64

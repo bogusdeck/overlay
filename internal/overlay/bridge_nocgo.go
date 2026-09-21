@@ -1,6 +1,6 @@
 //go:build !cgo
 
-package main
+package overlay
 
 import (
 	"fmt"

@@ -20,10 +20,10 @@ sha256sums=('SKIP')
 
 build() {
   cd "$srcdir"
-  GOOS=linux CGO_ENABLED=0 go build -o overlay .
+  GOOS=linux CGO_ENABLED=0 go build -o overlay ./cmd/overlay
 }
 
 package() {
   install -Dm755 overlay "$pkgdir/usr/bin/overlay"
-  install -Dm644 overlay.service "$pkgdir/usr/lib/systemd/user/overlay.service"
+  install -Dm644 packaging/systemd/overlay.service "$pkgdir/usr/lib/systemd/user/overlay.service"
 }

@@ -41,8 +41,8 @@ scratch/
 *.swp
 
 # Binaries & Packaging
-overlay
-overlay_linux
+/overlay
+/overlay_linux
 overlay_*.deb
 overlay-*.pkg.tar.zst
 

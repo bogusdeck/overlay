@@ -1,4 +1,4 @@
-package main
+package overlay
 
 import (
 	"encoding/json"
@@ -123,7 +123,7 @@ func parseLeaderKey(leaderStr string) (cmd, ctrl, fn, alt, shift bool) {
 	return
 }
 
-func handleConfigCommand(args []string) {
+func HandleConfigCommand(args []string) {
 	if len(args) == 0 || args[0] == "show" {
 		cfg := loadConfig()
 		fmt.Printf("Overlay Configuration:\n")

@@ -1,12 +1,25 @@
-package main
+package overlay
 
 import (
 	"fmt"
+	"os"
 	"sync"
 	"time"
 
 	"github.com/atotto/clipboard"
 )
+
+func Run() {
+	_ = os.WriteFile(pidFile, []byte(fmt.Sprintf("%d", os.Getpid())), 0644)
+
+	cfg := loadConfig()
+	applyFullConfig(cfg)
+
+	fmt.Printf("Starting Overlay HUD (Leader: %s, Font: %s %.1fpt, Opacity: %.0f%%)...\n", cfg.Leader, cfg.FontFamily, cfg.FontSize, cfg.Opacity)
+	startHotkeyListener()
+
+	platformRunLoop()
+}
 
 type HistoryCard struct {
 	Prompt string

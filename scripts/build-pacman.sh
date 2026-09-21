@@ -12,10 +12,10 @@ mkdir -p "${BUILD_DIR}/usr/bin"
 mkdir -p "${BUILD_DIR}/usr/lib/systemd/user"
 
 # Compile Linux binary
-GOOS=linux CGO_ENABLED=0 go build -o "${BUILD_DIR}/usr/bin/overlay" .
+GOOS=linux CGO_ENABLED=0 go build -o "${BUILD_DIR}/usr/bin/overlay" ./cmd/overlay
 
 # Copy systemd unit file
-cp overlay.service "${BUILD_DIR}/usr/lib/systemd/user/overlay.service"
+cp packaging/systemd/overlay.service "${BUILD_DIR}/usr/lib/systemd/user/overlay.service"
 
 mkdir -p dist
 if command -v makepkg >/dev/null 2>&1; then

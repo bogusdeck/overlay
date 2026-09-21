@@ -13,10 +13,10 @@ mkdir -p "${BUILD_DIR}/usr/bin"
 mkdir -p "${BUILD_DIR}/usr/lib/systemd/user"
 
 # Compile Linux binary
-GOOS=linux GOARCH="${ARCH}" CGO_ENABLED=0 go build -o "${BUILD_DIR}/usr/bin/overlay" .
+GOOS=linux GOARCH="${ARCH}" CGO_ENABLED=0 go build -o "${BUILD_DIR}/usr/bin/overlay" ./cmd/overlay
 
 # Copy systemd unit file
-cp overlay.service "${BUILD_DIR}/usr/lib/systemd/user/overlay.service"
+cp packaging/systemd/overlay.service "${BUILD_DIR}/usr/lib/systemd/user/overlay.service"
 
 # Generate control file
 cat <<EOF > "${BUILD_DIR}/DEBIAN/control"

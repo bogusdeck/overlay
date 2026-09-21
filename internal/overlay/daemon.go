@@ -1,4 +1,4 @@
-package main
+package overlay
 
 import (
 	"fmt"
@@ -31,7 +31,7 @@ func getRunningPID() int {
 	return pid
 }
 
-func startBackground() {
+func StartBackground() {
 	if pid := getRunningPID(); pid != 0 {
 		fmt.Printf("🛸 Overlay is already running in background (PID %d).\n", pid)
 		return
@@ -69,7 +69,7 @@ func startBackground() {
 	fmt.Println("   Use 'overlay --stop' or 'brew services stop overlay' to stop.")
 }
 
-func stopBackground() {
+func StopBackground() {
 	stopped := false
 
 	// If managed by Homebrew / launchd / systemd services, stop the service first to prevent auto-restart
@@ -108,7 +108,7 @@ func stopBackground() {
 	}
 }
 
-func showStatus() {
+func ShowStatus() {
 	if pid := getRunningPID(); pid != 0 {
 		fmt.Printf("🛸 Overlay is ACTIVE (PID %d).\n", pid)
 	} else {

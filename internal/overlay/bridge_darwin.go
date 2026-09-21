@@ -1,10 +1,10 @@
-//go:build linux && cgo
+//go:build darwin && cgo
 
-package main
+package overlay
 
 /*
-#cgo CFLAGS: -std=gnu99
-#cgo LDFLAGS: -lrt -lpthread
+#cgo CFLAGS: -x objective-c -Wno-deprecated-declarations -mmacosx-version-min=13.0
+#cgo LDFLAGS: -framework Cocoa -framework QuartzCore -framework Vision -framework CoreGraphics -mmacosx-version-min=13.0
 
 #include "overlay.h"
 #include <stdlib.h>

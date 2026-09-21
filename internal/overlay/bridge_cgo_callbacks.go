@@ -1,6 +1,6 @@
 //go:build cgo
 
-package main
+package overlay
 
 /*
 #include "overlay.h"
@@ -60,7 +60,7 @@ func goHotkeyToggleOverlay() {
 
 //export goHotkeyKillApp
 func goHotkeyKillApp() {
-	stopBackground()
+	StopBackground()
 }
 
 //export goHotkeyInstantAgy

@@ -1,4 +1,4 @@
-package main
+package overlay
 
 func startHotkeyListener() {
 	platformStartGlobalHotkeys()
