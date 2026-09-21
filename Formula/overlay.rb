@@ -2,7 +2,7 @@ class Overlay < Formula
   desc "Translucent HUD overlay for macOS & Linux with instant AI assistance"
   homepage "https://github.com/bogusdeck/overlay"
   url "https://github.com/bogusdeck/overlay/archive/refs/tags/v1.2.0.tar.gz"
-  sha256 "010b78ad6631c69b08c2d655e7c638fa07a16746cd2b70713f899d02e4ea4066"
+  sha256 "c8b9b79964c16dfbc700b0a8f345905606fcf30e72f5a447361b61805c9bf866"
   license "MIT"
   depends_on :macos
   depends_on "go" => :build
