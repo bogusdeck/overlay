@@ -177,11 +177,11 @@ func translateWithOllama(prompt string) (string, error) {
 }
 
 func translateWithAntigravity(prompt string) (string, error) {
-	args := []string{}
+	args := []string{"--dangerously-skip-permissions"}
 	if agyModel != "" {
 		args = append(args, "--model", agyModel)
 	}
-	if agyEffort != "" {
+	if agyEffort != "" && !strings.Contains(strings.ToLower(agyModel), "flash") {
 		args = append(args, "--effort", agyEffort)
 	}
 	args = append(args, "-p", prompt)
