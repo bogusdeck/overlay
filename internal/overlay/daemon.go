@@ -84,8 +84,8 @@ func StopBackground() {
 		}
 	}
 
-	// Terminate any remaining overlay instances
-	out, err := exec.Command("pgrep", "-f", "overlay").Output()
+	// Terminate any remaining overlay instances cleanly by exact executable name
+	out, err := exec.Command("pgrep", "-x", "overlay").Output()
 	if err == nil {
 		myPID := os.Getpid()
 		for _, line := range strings.Split(string(out), "\n") {
