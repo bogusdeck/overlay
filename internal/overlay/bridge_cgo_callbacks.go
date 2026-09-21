@@ -25,6 +25,7 @@ func goOnSubmitScreenCapture(cText *C.char) {
 		return
 	}
 	log.Printf("User submitted screen capture OCR prompt: %s", text)
+	platformEnsureHUDVisible()
 	go processTranslationWithPrimary(text, true, "antigravity")
 }
 

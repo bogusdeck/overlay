@@ -593,7 +593,9 @@ void ShowHUDText(const char* text) {
                 [gHUDWindow setFrame:frame display:YES animate:YES];
             }
 
-            [gHUDWindow orderFrontRegardless];
+            if ([gHUDWindow isVisible]) {
+                [gHUDWindow orderFrontRegardless];
+            }
         }
     });
 }
@@ -616,6 +618,15 @@ void ToggleHUDVisibility(void) {
                 [gHUDWindow makeKeyAndOrderFront:nil];
                 [NSApp activateIgnoringOtherApps:YES];
             }
+        }
+    });
+}
+
+void EnsureHUDVisible(void) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (gHUDWindow) {
+            [gHUDWindow makeKeyAndOrderFront:nil];
+            [NSApp activateIgnoringOtherApps:YES];
         }
     });
 }

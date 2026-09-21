@@ -50,6 +50,9 @@ func platformToggleHUDVisibility() {
 	C.ToggleHUDVisibility()
 }
 
+func platformEnsureHUDVisible() {
+}
+
 func platformMoveHUDWindow(dx, dy int) {
 	C.MoveHUDWindow(C.int(dx), C.int(dy))
 }

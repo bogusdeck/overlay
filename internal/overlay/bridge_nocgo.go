@@ -47,6 +47,8 @@ func platformResizeHUDWindow(dw, dh int) {}
 
 func platformSetHUDCursorStandard() {}
 
+func platformEnsureHUDVisible() {}
+
 func platformPerformScreenCaptureOCR() {
 	tmpImage := "/tmp/overlay_snap.png"
 	tmpTxtFile := "/tmp/overlay_ocr.txt"

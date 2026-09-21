@@ -21,6 +21,7 @@ void SetHUDFontConfig(const char* fontName, float fontSize);
 void ShowHUDText(const char* text);
 void SetHUDIndexText(const char* text);
 void ToggleHUDVisibility(void);
+void EnsureHUDVisible(void);
 void MoveHUDWindow(int dx, int dy);
 void ResizeHUDWindow(int dw, int dh);
 void SetHUDCursorStandard(void);
