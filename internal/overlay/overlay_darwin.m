@@ -732,8 +732,8 @@ static CGEventRef eventTapCallback(CGEventTapProxy proxy, CGEventType type, CGEv
                 case 4: // 'h' (Toggle Hide/Show Overlay)
                     goHotkeyToggleOverlay();
                     return NULL;
-                case 7: // 'x' (Kill / Stop Overlay Process completely)
-                    goHotkeyKillApp();
+                case 7: // 'x' (Clear all panels / history cards)
+                    goHotkeyClearPanels();
                     return NULL;
                 case 34: // 'i'
                     goHotkeyInstantAgy();

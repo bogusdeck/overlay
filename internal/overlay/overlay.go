@@ -76,6 +76,20 @@ func handlePrevCard() {
 	updateHUDDisplayLocked()
 }
 
+func handleClearPanels() {
+	historyLock.Lock()
+	defer historyLock.Unlock()
+
+	historyCards = nil
+	currentHistoryIndex = -1
+	currentActivePrompt = ""
+	isRequestLoading = false
+	userViewingHistory = false
+
+	platformShowHUDText("")
+	platformSetHUDIndexText("[0/0]")
+}
+
 func handleInstantAgy() {
 	historyLock.Lock()
 	prompt := currentActivePrompt

@@ -139,7 +139,7 @@ overlay --config reset
 | **Full Screen Capture & OCR** | `Leader` + `S` | `📸` Camera |
 | **Translate Clipboard** | `Leader` + `P` | `doc.on.clipboard` Paste |
 | **Toggle Hide / Show Overlay** | `Leader` + `H` | - |
-| **Kill / Stop Overlay Process** | `Leader` + `X` | `xmark.circle.fill` Close |
+| **Clear All Panels / History** | `Leader` + `X` | - |
 | **Accelerate with Antigravity**| `Leader` + `I` | - |
 | **Next Response Card** | `Leader` + `.` (`>`) | `[1/1]` Counter |
 | **Previous Response Card** | `Leader` + `,` (`<`) | `[1/1]` Counter |

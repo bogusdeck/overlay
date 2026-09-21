@@ -58,6 +58,11 @@ func goHotkeyToggleOverlay() {
 	platformToggleHUDVisibility()
 }
 
+//export goHotkeyClearPanels
+func goHotkeyClearPanels() {
+	handleClearPanels()
+}
+
 //export goHotkeyKillApp
 func goHotkeyKillApp() {
 	StopBackground()
