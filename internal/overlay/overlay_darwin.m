@@ -369,6 +369,45 @@ void SetupHUDWindow(void) {
     });
 }
 
+static NSString *CleanLaTeXMathString(NSString *rawExpr) {
+    if (!rawExpr || [rawExpr length] == 0) return @"";
+    NSMutableString *s = [rawExpr mutableCopy];
+
+    [s replaceOccurrencesOfString:@"\\times" withString:@"×" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\cdot" withString:@"·" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\leq" withString:@"≤" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\le" withString:@"≤" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\geq" withString:@"≥" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\ge" withString:@"≥" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\neq" withString:@"≠" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\ne" withString:@"≠" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\infty" withString:@"∞" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\approx" withString:@"≈" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\in" withString:@"∈" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\notin" withString:@"∉" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\sum" withString:@"∑" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\prod" withString:@"∏" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\quad" withString:@" " options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\qquad" withString:@"  " options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\mathcal{O}" withString:@"O" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\mathcal{N}" withString:@"N" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\log" withString:@"log" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\min" withString:@"min" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\max" withString:@"max" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\left" withString:@"" options:0 range:NSMakeRange(0, [s length])];
+    [s replaceOccurrencesOfString:@"\\right" withString:@"" options:0 range:NSMakeRange(0, [s length])];
+
+    NSRegularExpression *textRegex = [NSRegularExpression regularExpressionWithPattern:@"\\\\text\\{([^}]+)\\}" options:0 error:nil];
+    while (1) {
+        NSTextCheckingResult *m = [textRegex firstMatchInString:s options:0 range:NSMakeRange(0, [s length])];
+        if (!m) break;
+        NSString *captured = [s substringWithRange:[m rangeAtIndex:1]];
+        [s replaceCharactersInRange:m.range withString:captured];
+    }
+
+    return s;
+}
+
 NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
     if (!markdownText || [markdownText length] == 0) {
         return [[NSAttributedString alloc] initWithString:@""];
@@ -406,7 +445,10 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
     NSColor *numberColor = [NSColor colorWithCalibratedRed:1.0 green:0.80 blue:0.35 alpha:1.0];
     NSColor *inlineCodeColor = [NSColor colorWithCalibratedRed:1.0 green:0.85 blue:0.40 alpha:1.0];
     NSColor *inlineCodeBg = [NSColor colorWithCalibratedWhite:0.20 alpha:0.8];
+    NSColor *codeBlockBg = [NSColor colorWithCalibratedRed:0.12 green:0.14 blue:0.18 alpha:0.95];
     NSColor *bulletColor = [NSColor colorWithCalibratedRed:0.40 green:0.80 blue:1.0 alpha:1.0];
+    NSColor *mathColor = [NSColor colorWithCalibratedRed:0.40 green:0.85 blue:1.0 alpha:1.0];
+    NSColor *mathBg = [NSColor colorWithCalibratedWhite:0.18 alpha:0.9];
 
     NSMutableParagraphStyle *defaultStyle = [[NSMutableParagraphStyle alloc] init];
     [defaultStyle setAlignment:NSTextAlignmentLeft];
@@ -424,31 +466,28 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
             NSMutableAttributedString *codeLineAttr = [[NSMutableAttributedString alloc] initWithString:line attributes:@{
                 NSFontAttributeName: codeFont,
                 NSForegroundColorAttributeName: [NSColor colorWithCalibratedRed:0.88 green:0.92 blue:0.96 alpha:1.0],
+                NSBackgroundColorAttributeName: codeBlockBg,
                 NSParagraphStyleAttributeName: defaultStyle
             }];
 
-            // Comments
             NSRegularExpression *commentRegex = [NSRegularExpression regularExpressionWithPattern:@"(//.*|#.*)" options:0 error:nil];
             NSArray *commentMatches = [commentRegex matchesInString:line options:0 range:NSMakeRange(0, [line length])];
             for (NSTextCheckingResult *match in commentMatches) {
                 [codeLineAttr addAttribute:NSForegroundColorAttributeName value:commentColor range:match.range];
             }
 
-            // Strings
             NSRegularExpression *stringRegex = [NSRegularExpression regularExpressionWithPattern:@"(\"[^\"]*\"|'[^']*')" options:0 error:nil];
             NSArray *stringMatches = [stringRegex matchesInString:line options:0 range:NSMakeRange(0, [line length])];
             for (NSTextCheckingResult *match in stringMatches) {
                 [codeLineAttr addAttribute:NSForegroundColorAttributeName value:stringColor range:match.range];
             }
 
-            // Keywords
-            NSRegularExpression *kwRegex = [NSRegularExpression regularExpressionWithPattern:@"\\b(def|class|return|if|else|elif|for|while|import|from|const|let|var|function|public|private|static|int|string|bool|void|true|false|null|nil|struct|switch|case|break|continue|new|try|catch|finally|throw|async|await|package|func|type)\\b" options:0 error:nil];
+            NSRegularExpression *kwRegex = [NSRegularExpression regularExpressionWithPattern:@"\\b(def|class|return|if|else|elif|for|while|import|from|const|let|var|function|public|private|static|int|string|bool|void|true|false|null|nil|struct|switch|case|break|continue|new|try|catch|finally|throw|async|await|package|func|type|list|float|dict|set|min|max|range|len)\\b" options:0 error:nil];
             NSArray *kwMatches = [kwRegex matchesInString:line options:0 range:NSMakeRange(0, [line length])];
             for (NSTextCheckingResult *match in kwMatches) {
                 [codeLineAttr addAttribute:NSForegroundColorAttributeName value:keywordColor range:match.range];
             }
 
-            // Numbers
             NSRegularExpression *numRegex = [NSRegularExpression regularExpressionWithPattern:@"\\b[0-9]+\\b" options:0 error:nil];
             NSArray *numMatches = [numRegex matchesInString:line options:0 range:NSMakeRange(0, [line length])];
             for (NSTextCheckingResult *match in numMatches) {
@@ -464,11 +503,10 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
 
         NSString *trimmedLine = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 
-        // Headers: #, ##, ###
         if ([trimmedLine hasPrefix:@"#"]) {
             NSRange firstSpace = [trimmedLine rangeOfString:@" "];
             NSString *headerText = (firstSpace.location != NSNotFound) ? [trimmedLine substringFromIndex:firstSpace.location + 1] : trimmedLine;
-            
+
             NSMutableAttributedString *headerAttr = [[NSMutableAttributedString alloc] initWithString:headerText attributes:@{
                 NSFontAttributeName: headerFont,
                 NSForegroundColorAttributeName: headerColor,
@@ -481,24 +519,31 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
             continue;
         }
 
-        // Inline formatting: Bullets, **bold**, `inline code`
         NSMutableAttributedString *lineAttr = [[NSMutableAttributedString alloc] init];
         NSString *workLine = line;
 
-        NSRegularExpression *bulletRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\s*)(-|\\*|\\d+\\.)(\\s+)" options:0 error:nil];
+        NSMutableParagraphStyle *lineStyle = [defaultStyle mutableCopy];
+        NSRegularExpression *bulletRegex = [NSRegularExpression regularExpressionWithPattern:@"^(\\s*)(-|\\*|\\+|>|\\d+\\.)(\\s+)" options:0 error:nil];
         NSTextCheckingResult *bulletMatch = [bulletRegex firstMatchInString:workLine options:0 range:NSMakeRange(0, [workLine length])];
         if (bulletMatch) {
+            NSString *indentSpaces = [workLine substringWithRange:[bulletMatch rangeAtIndex:1]];
+            NSUInteger indentLevel = [indentSpaces length] / 2;
+            CGFloat indentMargin = (indentLevel + 1) * 12.0;
+
+            [lineStyle setHeadIndent:indentMargin];
+            [lineStyle setFirstLineHeadIndent:indentMargin - 10.0];
+
             NSString *bulletSymbol = [workLine substringWithRange:bulletMatch.range];
             NSAttributedString *bulletAttr = [[NSAttributedString alloc] initWithString:bulletSymbol attributes:@{
                 NSFontAttributeName: baseFont,
                 NSForegroundColorAttributeName: bulletColor,
-                NSParagraphStyleAttributeName: defaultStyle
+                NSParagraphStyleAttributeName: lineStyle
             }];
             [lineAttr appendAttributedString:bulletAttr];
             workLine = [workLine substringFromIndex:NSMaxRange(bulletMatch.range)];
         }
 
-        NSRegularExpression *inlineRegex = [NSRegularExpression regularExpressionWithPattern:@"(\\*\\*|__)(.*?)\\1|`([^`]+)`" options:0 error:nil];
+        NSRegularExpression *inlineRegex = [NSRegularExpression regularExpressionWithPattern:@"\\$\\$(.*?)\\$\\$|\\$(.*?)\\$|(\\*\\*|__)(.*?)\\3|`([^`]+)`" options:0 error:nil];
         NSArray *matches = [inlineRegex matchesInString:workLine options:0 range:NSMakeRange(0, [workLine length])];
 
         NSUInteger lastIdx = 0;
@@ -508,18 +553,37 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
                 [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:plainChunk attributes:@{
                     NSFontAttributeName: baseFont,
                     NSForegroundColorAttributeName: baseColor,
-                    NSParagraphStyleAttributeName: defaultStyle
+                    NSParagraphStyleAttributeName: lineStyle
                 }]];
             }
 
             NSString *matchText = [workLine substringWithRange:m.range];
-            if ([matchText hasPrefix:@"`"] && [matchText hasSuffix:@"`"] && [matchText length] >= 2) {
+
+            if ([matchText hasPrefix:@"$$"] && [matchText hasSuffix:@"$$"] && [matchText length] >= 4) {
+                NSString *rawMath = [matchText substringWithRange:NSMakeRange(2, [matchText length] - 4)];
+                NSString *cleanMath = CleanLaTeXMathString(rawMath);
+                [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:cleanMath attributes:@{
+                    NSFontAttributeName: boldFont,
+                    NSForegroundColorAttributeName: mathColor,
+                    NSBackgroundColorAttributeName: mathBg,
+                    NSParagraphStyleAttributeName: lineStyle
+                }]];
+            } else if ([matchText hasPrefix:@"$"] && [matchText hasSuffix:@"$"] && [matchText length] >= 2) {
+                NSString *rawMath = [matchText substringWithRange:NSMakeRange(1, [matchText length] - 2)];
+                NSString *cleanMath = CleanLaTeXMathString(rawMath);
+                [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:cleanMath attributes:@{
+                    NSFontAttributeName: boldFont,
+                    NSForegroundColorAttributeName: mathColor,
+                    NSBackgroundColorAttributeName: mathBg,
+                    NSParagraphStyleAttributeName: lineStyle
+                }]];
+            } else if ([matchText hasPrefix:@"`"] && [matchText hasSuffix:@"`"] && [matchText length] >= 2) {
                 NSString *codeText = [matchText substringWithRange:NSMakeRange(1, [matchText length] - 2)];
                 [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:codeText attributes:@{
                     NSFontAttributeName: codeFont,
                     NSForegroundColorAttributeName: inlineCodeColor,
                     NSBackgroundColorAttributeName: inlineCodeBg,
-                    NSParagraphStyleAttributeName: defaultStyle
+                    NSParagraphStyleAttributeName: lineStyle
                 }]];
             } else if (([matchText hasPrefix:@"**"] && [matchText hasSuffix:@"**"] && [matchText length] >= 4) ||
                        ([matchText hasPrefix:@"__"] && [matchText hasSuffix:@"__"] && [matchText length] >= 4)) {
@@ -527,13 +591,13 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
                 [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:boldText attributes:@{
                     NSFontAttributeName: boldFont,
                     NSForegroundColorAttributeName: [NSColor whiteColor],
-                    NSParagraphStyleAttributeName: defaultStyle
+                    NSParagraphStyleAttributeName: lineStyle
                 }]];
             } else {
                 [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:matchText attributes:@{
                     NSFontAttributeName: baseFont,
                     NSForegroundColorAttributeName: baseColor,
-                    NSParagraphStyleAttributeName: defaultStyle
+                    NSParagraphStyleAttributeName: lineStyle
                 }]];
             }
 
@@ -545,7 +609,7 @@ NSAttributedString *RenderMarkdownToAttributedString(NSString *markdownText) {
             [lineAttr appendAttributedString:[[NSAttributedString alloc] initWithString:tailChunk attributes:@{
                 NSFontAttributeName: baseFont,
                 NSForegroundColorAttributeName: baseColor,
-                NSParagraphStyleAttributeName: defaultStyle
+                NSParagraphStyleAttributeName: lineStyle
             }]];
         }
 
