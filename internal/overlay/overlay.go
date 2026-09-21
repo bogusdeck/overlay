@@ -31,6 +31,11 @@ var (
 	historyCards        []HistoryCard
 	currentHistoryIndex = -1
 	currentActivePrompt string
+
+	isRequestLoading   bool
+	userViewingHistory bool
+	currentActiveModel string
+	currentActiveStart time.Time
 )
 
 func handleNextCard() {
@@ -38,11 +43,20 @@ func handleNextCard() {
 	defer historyLock.Unlock()
 
 	if len(historyCards) == 0 {
+		if isRequestLoading && userViewingHistory {
+			userViewingHistory = false
+			updateHUDDisplayLocked()
+		}
 		return
 	}
+
 	if currentHistoryIndex < len(historyCards)-1 {
 		currentHistoryIndex++
-		updateHUDDisplay()
+		userViewingHistory = true
+		updateHUDDisplayLocked()
+	} else if isRequestLoading && userViewingHistory {
+		userViewingHistory = false
+		updateHUDDisplayLocked()
 	}
 }
 
@@ -53,10 +67,13 @@ func handlePrevCard() {
 	if len(historyCards) == 0 {
 		return
 	}
+
+	userViewingHistory = true
+
 	if currentHistoryIndex > 0 {
 		currentHistoryIndex--
-		updateHUDDisplay()
 	}
+	updateHUDDisplayLocked()
 }
 
 func handleInstantAgy() {
@@ -72,47 +89,34 @@ func handleInstantAgy() {
 		return
 	}
 
-	modelName := getModelNameForProvider("antigravity")
-	stopTimer := make(chan struct{})
-
-	go func() {
-		start := time.Now()
-		updateTimer := func() {
-			secs := int(time.Since(start).Seconds())
-			loadingText := fmt.Sprintf("%s (%ds)...", modelName, secs)
-			platformShowHUDText(loadingText)
-		}
-		updateTimer()
-
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
-
-		for {
-			select {
-			case <-stopTimer:
-				return
-			case <-ticker.C:
-				updateTimer()
-			}
-		}
-	}()
-
-	go func(p string) {
-		res := askAntigravity(p)
-		close(stopTimer)
-
-		historyLock.Lock()
-		historyCards = append(historyCards, HistoryCard{Prompt: p, Result: res})
-		currentHistoryIndex = len(historyCards) - 1
-		historyLock.Unlock()
-		updateHUDDisplay()
-	}(prompt)
+	go processTranslationWithPrimary(prompt, true, "antigravity")
 }
 
 func updateHUDDisplay() {
+	historyLock.Lock()
+	defer historyLock.Unlock()
+	updateHUDDisplayLocked()
+}
+
+func updateHUDDisplayLocked() {
+	if isRequestLoading && !userViewingHistory {
+		secs := int(time.Since(currentActiveStart).Seconds())
+		loadingText := fmt.Sprintf("%s (%ds)...", currentActiveModel, secs)
+		total := len(historyCards) + 1
+		idxText := fmt.Sprintf("[%d/%d ⏳]", total, total)
+
+		platformShowHUDText(loadingText)
+		platformSetHUDIndexText(idxText)
+		return
+	}
+
 	if currentHistoryIndex >= 0 && currentHistoryIndex < len(historyCards) {
 		card := historyCards[currentHistoryIndex]
-		idxText := fmt.Sprintf("[%d/%d]", currentHistoryIndex+1, len(historyCards))
+		total := len(historyCards)
+		if isRequestLoading {
+			total++
+		}
+		idxText := fmt.Sprintf("[%d/%d]", currentHistoryIndex+1, total)
 
 		platformShowHUDText(card.Result)
 		platformSetHUDIndexText(idxText)
@@ -124,22 +128,20 @@ func processTranslation(text string, isRawPrompt bool) {
 }
 
 func processTranslationWithPrimary(text string, isRawPrompt bool, primaryProvider string) {
+	modelName := getModelNameForProvider(primaryProvider)
+
 	historyLock.Lock()
+	isRequestLoading = true
+	userViewingHistory = false
 	currentActivePrompt = text
+	currentActiveModel = modelName
+	currentActiveStart = time.Now()
+	updateHUDDisplayLocked()
 	historyLock.Unlock()
 
-	modelName := getModelNameForProvider(primaryProvider)
 	stopTimer := make(chan struct{})
 
 	go func() {
-		start := time.Now()
-		updateTimer := func() {
-			secs := int(time.Since(start).Seconds())
-			loadingText := fmt.Sprintf("%s (%ds)...", modelName, secs)
-			platformShowHUDText(loadingText)
-		}
-		updateTimer()
-
 		ticker := time.NewTicker(1 * time.Second)
 		defer ticker.Stop()
 
@@ -148,7 +150,11 @@ func processTranslationWithPrimary(text string, isRawPrompt bool, primaryProvide
 			case <-stopTimer:
 				return
 			case <-ticker.C:
-				updateTimer()
+				historyLock.Lock()
+				if isRequestLoading && !userViewingHistory {
+					updateHUDDisplayLocked()
+				}
+				historyLock.Unlock()
 			}
 		}
 	}()
@@ -157,12 +163,14 @@ func processTranslationWithPrimary(text string, isRawPrompt bool, primaryProvide
 	close(stopTimer)
 
 	historyLock.Lock()
+	isRequestLoading = false
 	historyCards = append(historyCards, HistoryCard{Prompt: text, Result: result})
-	currentHistoryIndex = len(historyCards) - 1
+	if !userViewingHistory {
+		currentHistoryIndex = len(historyCards) - 1
+	}
 	currentActivePrompt = ""
+	updateHUDDisplayLocked()
 	historyLock.Unlock()
-
-	updateHUDDisplay()
 }
 
 func onTranslateClipboard() {
